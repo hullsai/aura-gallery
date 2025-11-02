@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Upload, Search, Heart, Share2, Grid3x3, List, FolderOpen, Filter, X, Tag as TagIcon, BarChart3, Trash2, CheckCircle } from 'lucide-react';
+import { LogOut, Upload, Search, Heart, Share2, Grid3x3, List, FolderOpen, Filter, X, Tag as TagIcon, BarChart3, Trash2, CheckCircle, Sparkles } from 'lucide-react';
 import axios from '../lib/axios';
 import { IMAGE_BASE_URL } from '../config';
 import UploadModal from '../components/UploadModal';
@@ -10,6 +10,7 @@ import ImageDetailModal from '../components/ImageDetailModal';
 import FilterPanel from '../components/FilterPanel';
 import type { FilterOptions } from '../components/FilterPanel';
 import BulkTagModal from '../components/BulkTagModal';
+import AITagModal from '../components/AITagModal';
 
 interface Image {
   id: number;
@@ -46,6 +47,7 @@ export default function GalleryPage() {
   const [showBulkTagModal, setShowBulkTagModal] = useState(false);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [availableTags, setAvailableTags] = useState<AvailableTag[]>([]);
+  const [showAITagModal, setShowAITagModal] = useState(false);
 
   const loadImages = useCallback(async () => {
     setLoading(true);
@@ -560,19 +562,35 @@ export default function GalleryPage() {
                     )}
                     {image.tags && (
                       <div className="flex gap-1 flex-wrap">
-                        {image.tags.split(',').slice(0, 2).map((tag, i) => (
-                          <button
-                            key={i}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleQuickTag(tag.trim());
-                            }}
-                            className="text-xs bg-aura-blue bg-opacity-20 text-aura-blue px-2 py-1 rounded hover:bg-opacity-30 transition-colors"
-                            title={`Filter by ${tag.trim()}`}
-                          >
-                            {tag}
-                          </button>
-                        ))}
+                        {(() => {
+                          const allTags = image.tags.split(',').map(t => t.trim());
+                          // Find rating tag
+                          const ratingTag = allTags.find(t => t.toLowerCase().startsWith('rated:'));
+                          // Get other tags
+                          const otherTags = allTags.filter(t => !t.toLowerCase().startsWith('rated:'));
+                          // Combine: rating first, then up to 1 other tag
+                          const displayTags = ratingTag 
+                            ? [ratingTag, ...otherTags.slice(0, 1)]
+                            : otherTags.slice(0, 2);
+                          
+                          return displayTags.map((tag, i) => (
+                            <button
+                              key={i}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleQuickTag(tag);
+                              }}
+                              className={`text-xs px-2 py-1 rounded hover:bg-opacity-30 transition-colors ${
+                                tag.toLowerCase().startsWith('rated:')
+                                  ? 'bg-purple-500 bg-opacity-20 text-purple-400 font-semibold'
+                                  : 'bg-aura-blue bg-opacity-20 text-aura-blue'
+                              }`}
+                              title={`Filter by ${tag}`}
+                            >
+                              {tag}
+                            </button>
+                          ));
+                        })()}
                       </div>
                     )}
                   </div>
@@ -604,6 +622,13 @@ export default function GalleryPage() {
               >
                 <TagIcon size={16} />
                 Tag Selected
+              </button>
+              <button 
+                onClick={() => setShowAITagModal(true)}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Sparkles size={18} />
+                Auto-Tag with AI
               </button>
               <button
               onClick={() => setShowBulkDeleteConfirm(true)}
@@ -659,6 +684,12 @@ export default function GalleryPage() {
           loadImages();
           loadAvailableTags();
         }}
+      />
+      <AITagModal
+        isOpen={showAITagModal}
+        onClose={() => setShowAITagModal(false)}
+        selectedImageIds={selectedImages}
+        onTaggingComplete={loadImages}
       />
       {/* Bulk Delete Confirmation Modal */}
       {showBulkDeleteConfirm && (

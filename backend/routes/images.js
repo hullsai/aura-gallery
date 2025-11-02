@@ -83,13 +83,13 @@ router.get('/', requireAuth, async (req, res) => {
     
     let sql = `
       SELECT i.*, 
-             GROUP_CONCAT(t.tag_name) as tags,
+             GROUP_CONCAT(it.tag_name) as tags,
              EXISTS(SELECT 1 FROM favorites f WHERE f.image_id = i.id AND f.user_id = ?) as is_favorite
       FROM images i
-      LEFT JOIN tags t ON i.id = t.image_id AND t.user_id = ?
+      LEFT JOIN image_tags it ON i.id = it.image_id
       WHERE i.owner_id = ?
     `;
-    const params = [req.session.userId, req.session.userId, req.session.userId];
+    const params = [req.session.userId, req.session.userId];
 
     // Add search filter
     if (search) {
@@ -101,20 +101,19 @@ router.get('/', requireAuth, async (req, res) => {
     if (noTags === 'true') {
       // Filter for images with NO tags
       sql += ` AND i.id NOT IN (
-        SELECT DISTINCT image_id FROM tags WHERE user_id = ?
+        SELECT DISTINCT image_id FROM image_tags
       )`;
-      params.push(req.session.userId);
     } else if (tags) {
       // Filter for images WITH specific tags
       const tagList = tags.split(',').map(t => t.trim());
       
       sql += ` AND i.id IN (
-        SELECT image_id FROM tags 
-        WHERE user_id = ? AND tag_name IN (${tagList.map(() => '?').join(',')})
+        SELECT image_id FROM image_tags 
+        WHERE tag_name IN (${tagList.map(() => '?').join(',')})
         GROUP BY image_id
         HAVING COUNT(DISTINCT tag_name) = ?
       )`;
-      params.push(req.session.userId, ...tagList, tagList.length);
+      params.push(...tagList, tagList.length);
     }
 
     // Add advanced filters using JSON queries
@@ -235,10 +234,11 @@ router.get('/filter-options', requireAuth, async (req, res) => {
 router.get('/tags/all', requireAuth, async (req, res) => {
   try {
     const tags = await dbAll(
-      `SELECT DISTINCT tag_name, category, COUNT(*) as usage_count 
-       FROM tags 
-       WHERE user_id = ? 
-       GROUP BY tag_name, category 
+      `SELECT tag_name, NULL as category, COUNT(*) as usage_count 
+       FROM image_tags it
+       JOIN images i ON it.image_id = i.id
+       WHERE i.owner_id = ?
+       GROUP BY tag_name 
        ORDER BY usage_count DESC, tag_name ASC`,
       [req.session.userId]
     );
@@ -262,10 +262,10 @@ router.get('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'Image not found' });
     }
 
-    // Get tags
+    // Get tags from image_tags table
     const tags = await dbAll(
-      'SELECT tag_name, category FROM tags WHERE image_id = ? AND user_id = ?',
-      [req.params.id, req.session.userId]
+      'SELECT tag_name, NULL as category FROM image_tags WHERE image_id = ?',
+      [req.params.id]
     );
 
     // Parse node_info if it exists
@@ -298,9 +298,10 @@ router.get('/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Add tag to image
 router.post('/:id/tags', requireAuth, async (req, res) => {
   try {
-    const { tagName, category } = req.body;
+    const { tagName } = req.body;
     
     // Verify ownership
     const image = await dbGet(
@@ -313,8 +314,8 @@ router.post('/:id/tags', requireAuth, async (req, res) => {
     }
 
     await dbRun(
-      'INSERT OR IGNORE INTO tags (user_id, image_id, tag_name, category) VALUES (?, ?, ?, ?)',
-      [req.session.userId, req.params.id, tagName, category || null]
+      'INSERT OR IGNORE INTO image_tags (image_id, tag_name) VALUES (?, ?)',
+      [req.params.id, tagName]
     );
 
     res.json({ success: true });
@@ -328,8 +329,8 @@ router.post('/:id/tags', requireAuth, async (req, res) => {
 router.delete('/:id/tags/:tagName', requireAuth, async (req, res) => {
   try {
     await dbRun(
-      'DELETE FROM tags WHERE user_id = ? AND image_id = ? AND tag_name = ?',
-      [req.session.userId, req.params.id, req.params.tagName]
+      'DELETE FROM image_tags WHERE image_id = ? AND tag_name = ?',
+      [req.params.id, req.params.tagName]
     );
 
     res.json({ success: true });

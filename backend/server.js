@@ -8,6 +8,7 @@ import imageRoutes from './routes/images.js';
 import sharingRoutes from './routes/sharing.js';
 import importRoutes from './routes/import.js';
 import tagRoutes from './routes/tags.js';
+import aiTaggingRoutes from './routes/ai-tagging.js';
 import statsRoutes from './routes/stats.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -62,6 +63,7 @@ app.use('/api/images', imageRoutes);
 app.use('/api/sharing', sharingRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/ai-tagging', aiTaggingRoutes);
 app.use('/api/stats', statsRoutes);
 
 // Serve image files
