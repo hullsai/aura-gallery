@@ -1,0 +1,32 @@
+cat > .gitignore << 'EOF'
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Database (don't commit your personal data)
+*.db
+*.db-journal
+
+# User images (too large for git)
+user_images/
+
+# Environment variables
+.env
+.env.local
+
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+EOF

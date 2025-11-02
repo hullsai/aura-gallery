@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-aura-darker text-aura-text antialiased;
+  }
+}
+
+@layer components {
+  /* MacOS 26 inspired button */
+  .btn-primary {
+    @apply bg-aura-blue text-white px-4 py-2 rounded-lg font-medium
+           hover:bg-opacity-90 transition-all duration-200
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-aura-gray text-aura-text px-4 py-2 rounded-lg font-medium
+           hover:bg-aura-light-gray transition-all duration-200
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply bg-aura-gray border border-aura-light-gray rounded-lg px-4 py-2
+           text-aura-text placeholder-aura-text-secondary
+           focus:outline-none focus:ring-2 focus:ring-aura-blue focus:border-transparent
+           transition-all duration-200;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-aura-dark rounded-xl border border-aura-gray p-6
+           shadow-lg backdrop-blur-xl;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-aura-dark bg-opacity-60 backdrop-blur-xl border border-aura-gray;
+  }
+}
