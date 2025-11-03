@@ -33,6 +33,7 @@ router.post('/analyze/:imageId', async (req, res) => {
     res.json({ 
       imageId,
       filename: image.filename,
+      filepath: image.filepath,
       suggestedTags
     });
   } catch (error) {
@@ -78,6 +79,7 @@ router.post('/batch-analyze', async (req, res) => {
           results.push({
             imageId,
             filename: image.filename,
+            filepath: image.filepath, // ADDED THIS
             suggestedTags,
             success: true
           });

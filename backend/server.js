@@ -16,6 +16,7 @@ import { dirname } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 
 // Initialize database
@@ -44,7 +45,8 @@ app.use(session({
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax',
-    domain: '.aura.thehulls.com'
+    domain: '.aura.thehulls.com',
+    path: '/'
   }
 }));
 

@@ -48,6 +48,7 @@ export default function GalleryPage() {
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [availableTags, setAvailableTags] = useState<AvailableTag[]>([]);
   const [showAITagModal, setShowAITagModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const loadImages = useCallback(async () => {
     setLoading(true);
@@ -111,7 +112,7 @@ export default function GalleryPage() {
 
   const handleImageDelete = async () => {
     await loadImages();
-    await loadAvailableTags(); // Reload tags in case counts changed
+    await loadAvailableTags();
   };
 
   const removeFilter = (filterKey: keyof FilterOptions) => {
@@ -141,7 +142,7 @@ export default function GalleryPage() {
     setActiveFilters({ 
       ...activeFilters, 
       tags: newTags.length > 0 ? newTags : undefined,
-      noTags: false // Clear noTags if selecting specific tags
+      noTags: false
     });
   };
 
@@ -149,7 +150,7 @@ export default function GalleryPage() {
     setActiveFilters({
       ...activeFilters,
       noTags: !activeFilters.noTags,
-      tags: !activeFilters.noTags ? undefined : activeFilters.tags // Clear tags if enabling noTags
+      tags: !activeFilters.noTags ? undefined : activeFilters.tags
     });
   };
 
@@ -193,6 +194,7 @@ export default function GalleryPage() {
       
       setSelectedImages([]);
       setShowBulkDeleteConfirm(false);
+      setDeleteConfirmText('');
       await loadImages();
       await loadAvailableTags();
     } catch (error) {
@@ -208,49 +210,47 @@ export default function GalleryPage() {
     <div className="min-h-screen bg-aura-darker">
       {/* Header */}
       <header className="glass border-b border-aura-gray sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">🎨</span>
-                <div>
-                  <h1 className="text-2xl font-bold text-aura-text">Aura Gallery</h1>
-                  <p className="text-sm text-aura-text-secondary">Welcome, {user?.username}</p>
-                </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl sm:text-3xl">🎨</span>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-aura-text">Aura Gallery</h1>
+                <p className="text-xs sm:text-sm text-aura-text-secondary">Welcome, {user?.username}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => setShowImportModal(true)}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 text-sm sm:text-base"
               >
-                <FolderOpen size={18} />
-                Import
+                <FolderOpen size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Import</span>
               </button>
               <button 
                 onClick={() => navigate('/tags')}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 text-sm sm:text-base"
               >
-                <TagIcon size={18} />
-                Tags
+                <TagIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Tags</span>
               </button>
               <button 
                 onClick={() => navigate('/stats')}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary flex items-center gap-2 text-sm sm:text-base"
               >
-                <BarChart3 size={18} />
-                Stats
+                <BarChart3 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Stats</span>
               </button>
               <button 
                 onClick={() => setShowUploadModal(true)}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary flex items-center gap-2 text-sm sm:text-base"
               >
-                <Upload size={18} />
+                <Upload size={16} className="sm:w-[18px] sm:h-[18px]" />
                 Upload
               </button>
-              <button onClick={handleLogout} className="btn-secondary flex items-center gap-2">
-                <LogOut size={18} />
-                Logout
+              <button onClick={handleLogout} className="btn-secondary flex items-center gap-2 text-sm sm:text-base">
+                <LogOut size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
@@ -258,13 +258,13 @@ export default function GalleryPage() {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Toolbar */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4">
+          <div className="flex gap-2 overflow-x-auto">
             <button
               onClick={() => setView('my-images')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm sm:text-base ${
                 view === 'my-images'
                   ? 'bg-aura-blue text-white'
                   : 'bg-aura-gray text-aura-text hover:bg-aura-light-gray'
@@ -274,37 +274,37 @@ export default function GalleryPage() {
             </button>
             <button
               onClick={() => setView('shared')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap text-sm sm:text-base ${
                 view === 'shared'
                   ? 'bg-aura-blue text-white'
                   : 'bg-aura-gray text-aura-text hover:bg-aura-light-gray'
               }`}
             >
-              <Share2 size={16} className="inline mr-2" />
-              Shared with Me ({sharedImages.length})
+              <Share2 size={14} className="inline mr-2 sm:w-4 sm:h-4" />
+              Shared ({sharedImages.length})
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-aura-text-secondary" size={18} />
+            <div className="relative flex-1 sm:flex-initial">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-aura-text-secondary" size={16} />
               <input
                 type="text"
-                placeholder="Search images..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field pl-10 w-64"
+                className="input-field pl-9 pr-3 w-full sm:w-64 text-sm sm:text-base h-10 sm:h-auto"
               />
             </div>
 
-           {/* Filter Button */}
+            {/* Filter Button */}
             <button
               onClick={() => setShowFilterPanel(true)}
-              className={`btn-secondary flex items-center gap-2 ${getActiveFilterCount() > 0 ? 'ring-2 ring-aura-blue' : ''}`}
+              className={`btn-secondary flex items-center gap-2 text-sm sm:text-base whitespace-nowrap ${getActiveFilterCount() > 0 ? 'ring-2 ring-aura-blue' : ''}`}
             >
-              <Filter size={18} />
-              Filters
+              <Filter size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">Filters</span>
               {getActiveFilterCount() > 0 && (
                 <span className="bg-aura-blue text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {getActiveFilterCount()}
@@ -312,14 +312,14 @@ export default function GalleryPage() {
               )}
             </button>
 
-            {/* Select All Filtered Button - Only shows when filters are active */}
+            {/* Select All Filtered Button */}
             {getActiveFilterCount() > 0 && filteredImages.length > 0 && (
               <button
                 onClick={selectAllImages}
-                className="btn-secondary flex items-center gap-2"
+                className="btn-secondary hidden lg:flex items-center gap-2 text-sm sm:text-base whitespace-nowrap"
               >
-                <CheckCircle size={18} />
-                Select All Filtered ({filteredImages.length})
+                <CheckCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
+                Select All ({filteredImages.length})
               </button>
             )}
 
@@ -329,13 +329,13 @@ export default function GalleryPage() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded ${viewMode === 'grid' ? 'bg-aura-blue text-white' : 'text-aura-text-secondary hover:text-aura-text'}`}
               >
-                <Grid3x3 size={18} />
+                <Grid3x3 size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded ${viewMode === 'list' ? 'bg-aura-blue text-white' : 'text-aura-text-secondary hover:text-aura-text'}`}
               >
-                <List size={18} />
+                <List size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
           </div>
@@ -344,29 +344,29 @@ export default function GalleryPage() {
         {/* Quick Tag Filter Bar */}
         {availableTags.length > 0 && (
           <div className="mb-4 pb-4 border-b border-aura-gray">
-            <div className="flex items-center gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-aura-gray scrollbar-track-transparent">
+            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-aura-gray scrollbar-track-transparent pb-2 sm:pb-0">
               {/* No Tags Option */}
               <button
                 onClick={toggleNoTagsFilter}
-                className={`flex-shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-shrink-0 inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   activeFilters.noTags
                     ? 'bg-red-500 bg-opacity-20 text-red-400 border border-red-500 border-opacity-50'
                     : 'bg-aura-gray text-aura-text hover:bg-aura-light-gray border border-transparent'
                 }`}
               >
-                <X size={14} />
+                <X size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>No Tags</span>
               </button>
 
               {/* Separator */}
-              <div className="w-px h-6 bg-aura-gray flex-shrink-0" />
+              <div className="w-px h-5 sm:h-6 bg-aura-gray flex-shrink-0" />
 
               {/* Available Tags */}
               {availableTags.map((tag) => (
                 <button
                   key={tag.tag_name}
                   onClick={() => toggleQuickTag(tag.tag_name)}
-                  className={`flex-shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-shrink-0 inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                     activeFilters.tags?.includes(tag.tag_name)
                       ? 'bg-aura-blue text-white border border-aura-blue'
                       : 'bg-aura-gray text-aura-text hover:bg-aura-light-gray border border-transparent'
@@ -383,110 +383,110 @@ export default function GalleryPage() {
         {/* Active Filters Pills */}
         {getActiveFilterCount() > 0 && (
           <div className="mb-4 flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-aura-text-secondary">Active filters:</span>
+            <span className="text-xs sm:text-sm text-aura-text-secondary">Active:</span>
             
             {activeFilters.noTags && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-sm border border-red-500 border-opacity-30">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-xs sm:text-sm border border-red-500 border-opacity-30">
                 <span>No Tags</span>
                 <button onClick={() => removeFilter('noTags')} className="hover:text-red-500">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
 
             {activeFilters.checkpoint && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
-                <span>Checkpoint: {activeFilters.checkpoint}</span>
-                <button onClick={() => removeFilter('checkpoint')} className="hover:text-red-400">
-                  <X size={14} />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
+                <span className="truncate max-w-[120px] sm:max-w-none">Checkpoint: {activeFilters.checkpoint}</span>
+                <button onClick={() => removeFilter('checkpoint')} className="hover:text-red-400 flex-shrink-0">
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.sampler && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Sampler: {activeFilters.sampler}</span>
                 <button onClick={() => removeFilter('sampler')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.orientation && activeFilters.orientation !== 'all' && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Orientation: {activeFilters.orientation}</span>
                 <button onClick={() => removeFilter('orientation')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.minSteps && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Min Steps: {activeFilters.minSteps}</span>
                 <button onClick={() => removeFilter('minSteps')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.maxSteps && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Max Steps: {activeFilters.maxSteps}</span>
                 <button onClick={() => removeFilter('maxSteps')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.minCfg && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Min CFG: {activeFilters.minCfg}</span>
                 <button onClick={() => removeFilter('minCfg')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.maxCfg && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>Max CFG: {activeFilters.maxCfg}</span>
                 <button onClick={() => removeFilter('maxCfg')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.dateFrom && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>From: {activeFilters.dateFrom}</span>
                 <button onClick={() => removeFilter('dateFrom')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.dateTo && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
                 <span>To: {activeFilters.dateTo}</span>
                 <button onClick={() => removeFilter('dateTo')} className="hover:text-red-400">
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
             
             {activeFilters.tags && activeFilters.tags.map(tag => (
-              <div key={tag} className="inline-flex items-center gap-2 px-3 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-sm">
-                <span>Tag: {tag}</span>
-                <button onClick={() => removeTagFilter(tag)} className="hover:text-red-400">
-                  <X size={14} />
+              <div key={tag} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-aura-blue bg-opacity-20 text-aura-blue rounded-full text-xs sm:text-sm">
+                <span className="truncate max-w-[100px] sm:max-w-none">Tag: {tag}</span>
+                <button onClick={() => removeTagFilter(tag)} className="hover:text-red-400 flex-shrink-0">
+                  <X size={12} />
                 </button>
               </div>
             ))}
             
             <button
               onClick={clearAllFilters}
-              className="px-3 py-1 text-sm text-red-400 hover:text-red-500 transition-colors"
+              className="px-2.5 py-1 text-xs sm:text-sm text-red-400 hover:text-red-500 transition-colors whitespace-nowrap"
             >
               Clear all
             </button>
@@ -496,15 +496,15 @@ export default function GalleryPage() {
         {/* Images Grid/List */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-aura-blue border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-aura-blue border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredImages.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-aura-gray mb-4">
-              <Upload size={32} className="text-aura-text-secondary" />
+          <div className="text-center py-12 sm:py-20 px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-aura-gray mb-4">
+              <Upload size={24} className="sm:w-8 sm:h-8 text-aura-text-secondary" />
             </div>
-            <h3 className="text-xl font-semibold text-aura-text mb-2">No images yet</h3>
-            <p className="text-aura-text-secondary mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-aura-text mb-2">No images yet</h3>
+            <p className="text-sm sm:text-base text-aura-text-secondary mb-6">
               {view === 'my-images' 
                 ? 'Upload your first image to get started' 
                 : 'No images have been shared with you yet'}
@@ -512,16 +512,16 @@ export default function GalleryPage() {
             {view === 'my-images' && (
               <button 
                 onClick={() => setShowUploadModal(true)}
-                className="btn-primary"
+                className="btn-primary text-sm sm:text-base"
               >
-                <Upload size={18} className="inline mr-2" />
+                <Upload size={16} className="inline mr-2 sm:w-[18px] sm:h-[18px]" />
                 Upload Image
               </button>
             )}
           </div>
         ) : (
           <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+            ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4' 
             : 'space-y-4'
           }>
             {filteredImages.map((image) => (
@@ -530,23 +530,24 @@ export default function GalleryPage() {
                 className="card hover:border-aura-blue transition-all cursor-pointer group relative"
               >
                 <div className="aspect-square bg-aura-gray rounded-lg overflow-hidden mb-3 relative">
-              {/* Checkbox overlay */}
-                <div 
-                  className="absolute top-2 left-2 z-10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedImages.includes(image.id)}
-                    onChange={() => toggleImageSelection(image.id)}
-                    className="w-5 h-5 rounded border-2 border-white bg-aura-dark cursor-pointer"
-                  />
-                </div>
-                  {/* Image - now clickable separately */}
+                  {/* Checkbox overlay */}
+                  <div 
+                    className="absolute top-2 left-2 z-10"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedImages.includes(image.id)}
+                      onChange={() => toggleImageSelection(image.id)}
+                      className="w-6 h-6 sm:w-5 sm:h-5 rounded border-2 border-white bg-aura-dark cursor-pointer"
+                    />
+                  </div>
+                  {/* Image */}
                   <div onClick={() => setSelectedImageId(image.id)} className="w-full h-full">
                     <img
                       src={`${IMAGE_BASE_URL}/${user?.username}/${image.filename}`}
                       alt={image.filename}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -564,11 +565,8 @@ export default function GalleryPage() {
                       <div className="flex gap-1 flex-wrap">
                         {(() => {
                           const allTags = image.tags.split(',').map(t => t.trim());
-                          // Find rating tag
                           const ratingTag = allTags.find(t => t.toLowerCase().startsWith('rated:'));
-                          // Get other tags
                           const otherTags = allTags.filter(t => !t.toLowerCase().startsWith('rated:'));
-                          // Combine: rating first, then up to 1 other tag
                           const displayTags = ratingTag 
                             ? [ratingTag, ...otherTags.slice(0, 1)]
                             : otherTags.slice(0, 2);
@@ -603,46 +601,50 @@ export default function GalleryPage() {
       
       {/* Bulk Actions Bar */}
       {selectedImages.length > 0 && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
-          <div className="glass rounded-lg px-6 py-4 shadow-2xl border border-aura-blue">
-            <div className="flex items-center gap-4">
-              <span className="text-aura-text font-medium">
-                {selectedImages.length} image{selectedImages.length !== 1 ? 's' : ''} selected
-              </span>
-              <button
-                onClick={selectAllImages}
-                className="text-sm text-aura-blue hover:text-aura-blue-light transition-colors"
-              >
-                Select All ({filteredImages.length})
-              </button>
-              <div className="w-px h-6 bg-aura-gray" />
-              <button
-                onClick={() => setShowBulkTagModal(true)}
-                className="btn-primary flex items-center gap-2"
-              >
-                <TagIcon size={16} />
-                Tag Selected
-              </button>
-              <button 
-                onClick={() => setShowAITagModal(true)}
-                className="btn-primary flex items-center gap-2"
-              >
-                <Sparkles size={18} />
-                Auto-Tag with AI
-              </button>
-              <button
-              onClick={() => setShowBulkDeleteConfirm(true)}
-              className="btn-secondary hover:bg-red-500 hover:bg-opacity-20 hover:text-red-500 hover:border-red-500 flex items-center gap-2 transition-colors"
-            >
-              <Trash2 size={16} />
-              Delete Selected
-            </button>
-            <button
-              onClick={clearSelection}
-              className="btn-secondary"
-            >
-              Clear Selection
-            </button>
+        <div className="fixed bottom-4 sm:bottom-8 left-2 right-2 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-40">
+          <div className="glass rounded-lg px-3 sm:px-6 py-3 sm:py-4 shadow-2xl border border-aura-blue">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
+              <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4">
+                <span className="text-aura-text font-medium text-sm sm:text-base">
+                  {selectedImages.length} selected
+                </span>
+                <button
+                  onClick={selectAllImages}
+                  className="text-xs sm:text-sm text-aura-blue hover:text-aura-blue-light transition-colors whitespace-nowrap"
+                >
+                  All ({filteredImages.length})
+                </button>
+              </div>
+              <div className="hidden sm:block w-px h-6 bg-aura-gray" />
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setShowBulkTagModal(true)}
+                  className="btn-primary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+                >
+                  <TagIcon size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Tag</span>
+                </button>
+                <button 
+                  onClick={() => setShowAITagModal(true)}
+                  className="btn-primary flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+                >
+                  <Sparkles size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">AI Tag</span>
+                </button>
+                <button
+                  onClick={() => setShowBulkDeleteConfirm(true)}
+                  className="btn-secondary hover:bg-red-500 hover:bg-opacity-20 hover:text-red-500 hover:border-red-500 flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+                >
+                  <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Delete</span>
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="btn-secondary text-xs sm:text-sm w-full sm:w-auto"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -693,29 +695,65 @@ export default function GalleryPage() {
       />
       {/* Bulk Delete Confirmation Modal */}
       {showBulkDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="glass rounded-lg p-6 max-w-md mx-4 border border-red-500">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 bg-red-500 bg-opacity-20 rounded-full">
-                <Trash2 size={24} className="text-red-500" />
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="glass rounded-lg p-4 sm:p-6 max-w-md w-full mx-4 border border-red-500">
+            <div className="flex items-start gap-3 sm:gap-4 mb-4">
+              <div className="p-2 sm:p-3 bg-red-500 bg-opacity-20 rounded-full flex-shrink-0">
+                <Trash2 size={20} className="sm:w-6 sm:h-6 text-red-500" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-aura-text mb-2">Delete {selectedImages.length} Image{selectedImages.length !== 1 ? 's' : ''}?</h3>
-                <p className="text-sm text-aura-text-secondary">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-aura-text mb-2">
+                  Delete {selectedImages.length} Image{selectedImages.length !== 1 ? 's' : ''}?
+                </h3>
+                <p className="text-xs sm:text-sm text-aura-text-secondary mb-3">
                   This will permanently delete the selected images. This action cannot be undone.
                 </p>
+
+                {/* Tiered Confirmation */}
+                {selectedImages.length > 5 && (
+                  <div className="mt-4">
+                    <label className="block text-sm text-aura-text mb-2 font-medium">
+                      {selectedImages.length <= 50 
+                        ? `Type ${selectedImages.length} to confirm:`
+                        : `Type DELETE ${selectedImages.length} to confirm:`
+                      }
+                    </label>
+                    <input
+                      type="text"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder={selectedImages.length <= 50 ? selectedImages.length.toString() : `DELETE ${selectedImages.length}`}
+                      className="input-field w-full"
+                      autoFocus
+                    />
+                  </div>
+                )}
               </div>
             </div>
+
             <div className="flex gap-3">
               <button
-                onClick={() => setShowBulkDeleteConfirm(false)}
-                className="flex-1 btn-secondary"
+                onClick={() => {
+                  setShowBulkDeleteConfirm(false);
+                  setDeleteConfirmText('');
+                }}
+                className="flex-1 btn-secondary text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
-                onClick={handleBulkDelete}
-                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium"
+                onClick={() => {
+                  handleBulkDelete();
+                  setDeleteConfirmText('');
+                }}
+                disabled={
+                  selectedImages.length > 5 && 
+                  (selectedImages.length <= 50 
+                    ? deleteConfirmText !== selectedImages.length.toString()
+                    : deleteConfirmText !== `DELETE ${selectedImages.length}`
+                  )
+                }
+                className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
               >
                 Delete
               </button>

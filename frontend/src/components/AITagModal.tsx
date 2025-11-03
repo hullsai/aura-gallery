@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Sparkles, Check, AlertCircle } from 'lucide-react';
 import axios from '../lib/axios';
+import { IMAGE_BASE_URL } from '../config';
 
 interface AITagModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface AITagModalProps {
 interface TagSuggestion {
   imageId: number;
   filename: string;
+  filepath: string;
   suggestedTags: string[];
   approved: boolean;
 }
@@ -38,8 +40,9 @@ export default function AITagModal({ isOpen, onClose, selectedImageIds, onTaggin
       const results = response.data.results.map((r: any) => ({
         imageId: r.imageId,
         filename: r.filename,
+        filepath: r.filepath,
         suggestedTags: r.suggestedTags || [],
-        approved: autoApprove // Use checkbox setting
+        approved: autoApprove
       }));
 
       setSuggestions(results);
@@ -116,6 +119,19 @@ export default function AITagModal({ isOpen, onClose, selectedImageIds, onTaggin
         ? { ...s, suggestedTags: s.suggestedTags.filter((_, ti) => ti !== tagIndex) }
         : s
     ));
+  }
+
+  // Helper to get just the filename from full path for URL construction
+  function getImageUrl(filepath: string, filename: string): string {
+    // Extract username from filepath like /Users/.../user_images/admin/filename.png
+    const pathParts = filepath.split('/');
+    const userIndex = pathParts.indexOf('user_images');
+    if (userIndex !== -1 && userIndex + 1 < pathParts.length) {
+      const username = pathParts[userIndex + 1];
+      return `${IMAGE_BASE_URL}/${username}/${filename}`;
+    }
+    // Fallback
+    return `${IMAGE_BASE_URL}/admin/${filename}`;
   }
 
   const approvedCount = suggestions.filter(s => s.approved).length;
@@ -212,41 +228,56 @@ export default function AITagModal({ isOpen, onClose, selectedImageIds, onTaggin
                       : 'border-aura-gray bg-aura-darker'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <p className="text-aura-text font-medium truncate">{suggestion.filename}</p>
-                      <p className="text-xs text-aura-muted mt-1">
-                        {suggestion.suggestedTags.length} tag{suggestion.suggestedTags.length !== 1 ? 's' : ''} suggested
-                      </p>
+                  <div className="flex gap-4">
+                    {/* Thumbnail */}
+                    <div className="flex-shrink-0">
+                      <img
+                        src={getImageUrl(suggestion.filepath, suggestion.filename)}
+                        alt={suggestion.filename}
+                        className="w-32 h-32 object-cover rounded-lg border border-aura-gray"
+                        loading="lazy"
+                      />
                     </div>
-                    <button
-                      onClick={() => toggleApproval(index)}
-                      className={`flex items-center gap-2 px-3 py-1 rounded text-sm ${
-                        suggestion.approved
-                          ? 'bg-aura-accent text-white'
-                          : 'bg-aura-gray text-aura-muted hover:bg-aura-gray/70'
-                      }`}
-                    >
-                      <Check size={16} />
-                      {suggestion.approved ? 'Approved' : 'Approve'}
-                    </button>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {suggestion.suggestedTags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="inline-flex items-center gap-2 px-3 py-1 bg-aura-gray rounded-full text-sm text-aura-text"
-                      >
-                        {tag}
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-aura-text font-medium truncate">{suggestion.filename}</p>
+                          <p className="text-xs text-aura-muted mt-1">
+                            {suggestion.suggestedTags.length} tag{suggestion.suggestedTags.length !== 1 ? 's' : ''} suggested
+                          </p>
+                        </div>
                         <button
-                          onClick={() => removeTag(index, tagIndex)}
-                          className="text-aura-muted hover:text-red-400"
+                          onClick={() => toggleApproval(index)}
+                          className={`flex-shrink-0 ml-3 flex items-center gap-2 px-3 py-1 rounded text-sm ${
+                            suggestion.approved
+                              ? 'bg-aura-accent text-white'
+                              : 'bg-aura-gray text-aura-muted hover:bg-aura-gray/70'
+                          }`}
                         >
-                          <X size={14} />
+                          <Check size={16} />
+                          {suggestion.approved ? 'Approved' : 'Approve'}
                         </button>
-                      </span>
-                    ))}
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {suggestion.suggestedTags.map((tag, tagIndex) => (
+                          <span
+                            key={tagIndex}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-aura-gray rounded-full text-sm text-aura-text"
+                          >
+                            {tag}
+                            <button
+                              onClick={() => removeTag(index, tagIndex)}
+                              className="text-aura-muted hover:text-red-400"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
